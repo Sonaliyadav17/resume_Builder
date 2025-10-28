@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Resume Builder — Modern</title>
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- html2pdf for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+</head>
+
+<body class="bg-gray-50 font-inter text-slate-800">
+  <div class="max-w-7xl mx-auto p-4 md:p-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+
+      <!-- LEFT: Editor -->
+      <aside class="w-full lg:w-1/2 bg-white rounded-xl shadow-lg p-6 space-y-6" id="editorPane" aria-label="Resume editor">
+        <header class="flex items-start justify-between gap-4">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-extrabold">Resume Content Editor</h1>
+            <p class="text-sm text-slate-500">Edit fields — preview updates live. Use the buttons to export or save.</p>
+          </div>
+        </header>
+
+        <form id="resumeForm" class="space-y-5" autocomplete="off" novalidate>
+          <!-- Personal Info -->
+          <section class="panel">
+            <h2 class="panel-title">Personal Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input id="name" name="name" type="text" placeholder="Full name" class="control" value="Elena Rodriguez">
+              <input id="title" name="title" type="text" placeholder="Professional title" class="control" value="Senior Data Scientist, Machine Learning Focus">
+              <input id="email" name="email" type="email" placeholder="Email" class="control" value="elena.rodriguez.ds@example.com">
+              <input id="phone" name="phone" type="tel" placeholder="Phone" class="control" value="+1 555-123-4567">
+              <input id="location" name="location" type="text" placeholder="Location (city, country)" class="control" value="San Francisco, CA">
+              <input id="linkedin" name="linkedin" type="url" placeholder="LinkedIn (fullname or full URL)" class="control" value="https://linkedin.com/in/elenarodriguez-data">
+            </div>
+
+            <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
+              <label class="text-sm text-slate-600">Profile photo (optional)</label>
+              <input id="photoUpload" type="file" accept="image/*" class="control-file">
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Tip: square images work best.</p>
+          </section>
+
+          <!-- Summary -->
+          <section class="panel">
+            <div class="flex items-center justify-between">
+              <h2 class="panel-title">Professional Summary</h2>
+              <div class="text-sm space-x-2 text-slate-600">
+                <label class="inline-flex items-center gap-2">
+                  <input id="toggleSummary" type="checkbox" checked>
+                  Show
+                </label>
+              </div>
+            </div>
+            <textarea id="summary" name="summary" rows="4" class="control" placeholder="Brief, powerful summary...">Results-driven Data Scientist with 6+ years of experience leading complex machine learning projects in the FinTech sector. Proven expertise in predictive modeling, deep learning, and scalable data pipeline architecture (ETL/ELT).</textarea>
+          </section>
+
+          <!-- Experience (single primary entry) -->
+          <section class="panel">
+            <h2 class="panel-title">Experience (Primary)</h2>
+            <div class="space-y-2">
+              <input id="exp-title" name="expTitle" type="text" placeholder="Job title" class="control" value="Senior Data Scientist">
+              <input id="exp-company" name="expCompany" type="text" placeholder="Company" class="control" value="Apex Financial Corp">
+              <input id="exp-dates" name="expDates" type="text" placeholder="Dates (e.g., Jan 2021 – Present)" class="control" value="Jan 2021 – Present">
+              <textarea id="exp-desc" name="expDesc" rows="4" class="control" placeholder="- Key responsibilities...">- Led a team of three data scientists to develop and deploy a low-latency credit risk scoring model (XGBoost).
+- Improved fraud detection accuracy by 15% by implementing a graph neural network (GNN) model.
+- Designed and maintained production-level ETL pipelines using Apache Spark and Airflow.</textarea>
+            </div>
+          </section>
+
+          <!-- Education (dynamic) -->
+          <section class="panel">
+            <div class="flex items-center justify-between">
+              <h2 class="panel-title">Education</h2>
+              <div class="text-sm">
+                <button id="addEducationBtn" type="button" class="btn-outline-sm">+ Add</button>
+              </div>
+            </div>
+            <div id="educationEntries" class="space-y-3">
+              <!-- template entry -->
+              <div class="entry education-entry">
+                <input data-field="degree" class="control" placeholder="Degree / Specialization" value="M.S. in Data Science">
+                <input data-field="institution" class="control" placeholder="Institution" value="Stanford University">
+                <input data-field="eduDates" class="control" placeholder="Dates (e.g., 2019 - 2020)" value="2019 - 2020">
+                <button type="button" class="remove-entry hidden">Remove</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Projects (dynamic) -->
+          <section class="panel">
+            <div class="flex items-center justify-between">
+              <h2 class="panel-title">Projects</h2>
+              <div class="text-sm flex items-center gap-3">
+                <label class="inline-flex items-center gap-2">
+                  <input id="toggleProjects" type="checkbox" checked>
+                  Show
+                </label>
+                <button id="addProjectBtn" type="button" class="btn-outline-sm">+ Add</button>
+              </div>
+            </div>
+            <div id="projectEntries" class="space-y-3">
+              <div class="entry project-entry">
+                <input data-field="projName" class="control" placeholder="Project name" value="Stock Volatility Predictor">
+                <input data-field="projLink" class="control" placeholder="Project link (optional)" value="https://github.com/elena/stock-predictor">
+                <textarea data-field="projDesc" class="control" rows="3" placeholder="- Project details...">- Built and trained an LSTM model to predict 7-day stock volatility, achieving an RMSE reduction of 20% over ARIMA models.
+- Created a web dashboard (Flask/React) for real-time visualization.</textarea>
+                <button type="button" class="remove-entry hidden">Remove</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Skills -->
+          <section class="panel">
+            <h2 class="panel-title">Skills</h2>
+            <textarea id="skills" name="skills" rows="2" class="control" placeholder="List skills separated by commas">Python, R, SQL, TensorFlow, PyTorch, Scikit-learn, AWS, Docker, Kubernetes, Time Series Analysis, A/B Testing</textarea>
+            <p class="text-xs text-slate-500 mt-1">These will be shown as tags in the preview.</p>
+          </section>
+
+          <!-- Controls: theme, save/load, export -->
+          <section class="panel">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Template</label>
+                <div class="flex gap-2" id="themeButtons">
+                  <button type="button" data-theme="blue" class="theme-btn active">Modern Blue</button>
+                  <button type="button" data-theme="classic" class="theme-btn">Classic Gray</button>
+                  <button type="button" data-theme="green" class="theme-btn">Elegant Green</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Save / Load</label>
+                <div class="flex gap-2">
+                  <button id="saveJsonBtn" type="button" class="btn-primary">Save JSON</button>
+                  <label for="loadJsonInput" class="btn-outline">Load JSON</label>
+                  <input id="loadJsonInput" type="file" accept=".json" class="hidden">
+                </div>
+              </div>
+            </div>
+</section>
+<section>
+            <div class="flex gap-2 mt-4">
+              <button id="downloadPdfBtn" type="button" class="btn-primary flex-1">Download PDF</button>
+              <button id="printBtn" type="button" class="btn-outline">Print</button>
+            </div>
+
+
+
+            <p class="text-xs text-slate-500 mt-3">Progress is autosaved in your browser.</p>
+          </section>
+        </form>
+      </aside>
+
+
+
+      <!-- RIGHT: Resume Preview -->
+      <main class="w-full lg:w-1/2">
+        <div class="resume-preview-wrapper p-6 bg-white rounded-xl shadow-lg">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-lg font-semibold">Live Resume Preview</h3>
+            <small class="text-xs text-slate-500">What you export/print</small>
+          </div>
+
+          <!-- The actual resume container that will be exported/printed -->
+          <div id="resumePreview" class="resume-card p-6" role="region" aria-label="Resume preview">
+            <!-- Content injected by JS -->
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- App JS -->
+  <script src="script.js" defer></script>
+</body>
+</html>
