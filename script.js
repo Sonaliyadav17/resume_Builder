@@ -1,6 +1,6 @@
 /* script.js — Clean, modular, commented */
 
-// -------------------------
+// ------------------------
 // Utilities
 // -------------------------
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -429,3 +429,4 @@ function init() {
 
 // run
 init();
+
